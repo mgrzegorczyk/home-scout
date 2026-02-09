@@ -30,6 +30,12 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/News");
+    return Task.CompletedTask;
+});
+
 app.MapRazorPages();
 
 app.Run();
