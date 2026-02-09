@@ -23,10 +23,8 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
-        // Pobierz wszystkie newsy
         NewsItems = await _newsItemRepository.GetAllAsync();
-
-        // Pobierz nazwy kanałów
+        
         var channels = await _channelRepository.GetAllAsync();
         ChannelNames = channels.ToDictionary(c => c.Id, c => c.Name);
     }
