@@ -23,7 +23,7 @@ public sealed class RssWorker : BackgroundService
     {
         await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
 
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
