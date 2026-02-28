@@ -1,10 +1,12 @@
 IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = 'HomeScout')
     BEGIN
         CREATE DATABASE HomeScout;
+        EXEC('ALTER DATABASE HomeScout SET RECOVERY SIMPLE');
     END
-GO
-
-ALTER DATABASE HomeScout SET RECOVERY SIMPLE;
+ELSE
+    BEGIN
+        ALTER DATABASE HomeScout SET RECOVERY SIMPLE;
+    END
 GO
 
 USE HomeScout;
