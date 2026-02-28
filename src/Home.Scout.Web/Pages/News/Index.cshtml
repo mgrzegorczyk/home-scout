@@ -21,28 +21,40 @@
                     {
                         <tr>
                             <td class="text-nowrap">
-                                <small>@news.PublishedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                                <small>
+                                    @news.PublishedAt.ToString("yyyy-MM-dd HH:mm")
+                                </small>
                             </td>
+
                             <td>
                                 <strong>
-                                    @if (!string.IsNullOrEmpty(news.Link))
+                                    @if (!string.IsNullOrWhiteSpace(news.Link))
                                     {
-                                        <a href="@news.Link" target="_blank">@news.Title</a>
+                                        <a href="@news.Link" target="_blank">
+                                            @news.Title
+                                        </a>
                                     }
                                     else
                                     {
                                         @news.Title
                                     }
                                 </strong>
+
                                 <br />
+
                                 <small class="text-muted">
-                                    @(string.IsNullOrEmpty(news.Description) ? "-" : news.Description)
+                                    @(!string.IsNullOrWhiteSpace(news.Description)
+                                        ? news.Description
+                                        : "-")
                                 </small>
                             </td>
+
                             <td>
                                 @if (Model.ChannelNames.TryGetValue(news.RssChannelId, out var channelName))
                                 {
-                                    <span class="badge bg-info">@channelName</span>
+                                    <span class="badge bg-info">
+                                        @channelName
+                                    </span>
                                 }
                             </td>
                         </tr>
@@ -54,7 +66,9 @@
     else
     {
         <div class="alert alert-info" role="alert">
-            <i class="bi bi-info-circle"></i> No news available. <a href="/Channels">Add RSS channels and fetch articles</a>.
+            <i class="bi bi-info-circle"></i>
+            No news available.
+            <a href="/RssChannels">Add RSS channels and fetch articles</a>.
         </div>
     }
 </div>

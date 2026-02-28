@@ -1,34 +1,36 @@
-using Home.Scout.Web.Data;
-using Home.Scout.Web.Models;
-using Microsoft.AspNetCore.Mvc;
+using Home.Scout.Application.News;
+using Home.Scout.Application.RssChannels;
+using Home.Scout.Application.News.Dto;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Home.Scout.Web.Pages.News;
 
 public class IndexModel : PageModel
 {
-    private readonly INewsItemRepository _newsItemRepository;
-    private readonly IRssChannelRepository _channelRepository;
+    private readonly INewsItemService _newsItemService;
+    private readonly IChannelService _channelService;
 
-    public List<NewsItem>? NewsItems { get; set; }
-    public Dictionary<int, string> ChannelNames { get; set; } = new();
+    public List<NewsItemDto> NewsItems { get; private set; } = new();
+    public Dictionary<int, string> ChannelNames { get; private set; } = new();
 
     public IndexModel(
-        INewsItemRepository newsItemRepository,
-        IRssChannelRepository channelRepository)
+        INewsItemService newsItemService,
+        IChannelService channelService)
     {
-        _newsItemRepository = newsItemRepository;
-        _channelRepository = channelRepository;
+        _newsItemService = newsItemService;
+        _channelService = channelService;
     }
 
     public async Task OnGetAsync()
     {
-        NewsItems = await _newsItemRepository.GetAllAsync();
-        
-        var channels = await _channelRepository.GetAllAsync();
-        ChannelNames = channels.ToDictionary(c => c.Id, c => c.Name);
+        var newsTask = _newsItemService.GetAllAsync();
+        var channelsTask = _channelService.GetAllAsync();
+
+        await Task.WhenAll(newsTask, channelsTask);
+
+        NewsItems = newsTask.Result.ToList();
+
+        ChannelNames = channelsTask.Result
+            .ToDictionary(x => x.Id, x => x.Name);
     }
 }
-
-
-
