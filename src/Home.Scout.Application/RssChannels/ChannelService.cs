@@ -5,11 +5,11 @@ namespace Home.Scout.Application.RssChannels;
 
 public interface IChannelService
 {
-    Task<IReadOnlyList<RssChannelDto>> GetAllAsync();
-    Task<RssChannelDto?> GetByIdAsync(int id);
-    Task<int> CreateAsync(CreateRssChannelDto dto);
-    Task UpdateAsync(UpdateRssChannelDto dto);
-    Task DeleteAsync(int id);
+    Task<IReadOnlyList<RssChannelDto>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<RssChannelDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<int> CreateAsync(CreateRssChannelDto dto, CancellationToken cancellationToken = default);
+    Task UpdateAsync(UpdateRssChannelDto dto, CancellationToken cancellationToken = default);
+    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 }
 
 public class ChannelService : IChannelService
@@ -21,25 +21,30 @@ public class ChannelService : IChannelService
         _repository = repository;
     }
 
-    public async Task<IReadOnlyList<RssChannelDto>> GetAllAsync()
+    public async Task<IReadOnlyList<RssChannelDto>> GetAllAsync(
+        CancellationToken cancellationToken = default)
     {
-        var entities = await _repository.GetAllAsync();
+        var entities = await _repository.GetAllAsync(cancellationToken);
 
         return entities
             .Select(MapToDto)
             .ToList();
     }
 
-    public async Task<RssChannelDto?> GetByIdAsync(int id)
+    public async Task<RssChannelDto?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await _repository.GetByIdAsync(id, cancellationToken);
 
         return entity is null
             ? null
             : MapToDto(entity);
     }
 
-    public async Task<int> CreateAsync(CreateRssChannelDto dto)
+    public async Task<int> CreateAsync(
+        CreateRssChannelDto dto,
+        CancellationToken cancellationToken = default)
     {
         ValidateCreate(dto);
 
@@ -52,16 +57,18 @@ public class ChannelService : IChannelService
             UpdatedAt = DateTime.UtcNow
         };
 
-        await _repository.AddAsync(entity);
+        await _repository.AddAsync(entity, cancellationToken);
 
         return entity.Id;
     }
 
-    public async Task UpdateAsync(UpdateRssChannelDto dto)
+    public async Task UpdateAsync(
+        UpdateRssChannelDto dto,
+        CancellationToken cancellationToken = default)
     {
         ValidateUpdate(dto);
 
-        var entity = await _repository.GetByIdAsync(dto.Id)
+        var entity = await _repository.GetByIdAsync(dto.Id, cancellationToken)
                      ?? throw new KeyNotFoundException($"Channel with Id {dto.Id} not found.");
 
         entity.Name = dto.Name.Trim();
@@ -69,15 +76,17 @@ public class ChannelService : IChannelService
         entity.Description = dto.Description?.Trim() ?? string.Empty;
         entity.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(entity);
+        await _repository.UpdateAsync(entity, cancellationToken);
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(
+        int id,
+        CancellationToken cancellationToken = default)
     {
-        var entity = await _repository.GetByIdAsync(id)
+        var entity = await _repository.GetByIdAsync(id, cancellationToken)
                      ?? throw new KeyNotFoundException($"Channel with Id {id} not found.");
 
-        await _repository.DeleteAsync(entity);
+        await _repository.DeleteAsync(entity, cancellationToken);
     }
 
     private static RssChannelDto MapToDto(RssChannel entity)

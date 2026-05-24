@@ -4,14 +4,17 @@ namespace Home.Scout.Application.News;
 
 public interface INewsItemRepository
 {
-    Task<List<NewsItem>> GetAllAsync();
-    Task<List<NewsItem>> GetByChannelIdAsync(int channelId);
-    Task<NewsItem?> GetByIdAsync(int id);
-    Task<int> AddAsync(NewsItem newsItem);
-    Task<bool> UpdateAsync(NewsItem newsItem);
-    Task<bool> DeleteAsync(int id);
-    Task<bool> DeleteByChannelIdAsync(int channelId);
-    Task BulkInsertIgnoreDuplicatesAsync(IEnumerable<NewsItem> items);
+    Task<IReadOnlyList<NewsItem>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<NewsItem>> GetByChannelIdAsync(int channelId, CancellationToken cancellationToken = default);
+    Task<NewsItem?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+
+    Task<int> AddAsync(NewsItem entity, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAsync(NewsItem entity, CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> DeleteByChannelIdAsync(int channelId, CancellationToken cancellationToken = default);
+
+    Task BulkInsertIgnoreDuplicatesAsync(
+        IEnumerable<NewsItem> entities,
+        CancellationToken cancellationToken = default);
 }
-
-

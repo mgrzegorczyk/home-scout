@@ -13,81 +13,87 @@ public class RssChannelRepository : IRssChannelRepository
     public RssChannelRepository(IConfiguration configuration)
     {
         _connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     }
 
-    public async Task<List<RssChannel>> GetAllAsync()
+    public async Task<List<RssChannel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
 
         const string sql = """
-            SELECT Id, Name, Url, Description, CreatedAt, UpdatedAt
-            FROM RssChannels
-            ORDER BY Name
-        """;
+                               SELECT Id, Name, Url, Description, CreatedAt, UpdatedAt
+                               FROM RssChannels
+                               ORDER BY Name
+                           """;
 
-        var result = await connection.QueryAsync<RssChannel>(sql);
-        return result.ToList();
+        var result = await connection.QueryAsync<RssChannel>(
+            new CommandDefinition(sql, cancellationToken: cancellationToken));
+
+        return result.AsList();
     }
 
-    public async Task<RssChannel?> GetByIdAsync(int id)
+    public async Task<RssChannel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
 
         const string sql = """
-            SELECT Id, Name, Url, Description, CreatedAt, UpdatedAt
-            FROM RssChannels
-            WHERE Id = @Id
-        """;
+                               SELECT Id, Name, Url, Description, CreatedAt, UpdatedAt
+                               FROM RssChannels
+                               WHERE Id = @Id
+                           """;
 
-        return await connection.QueryFirstOrDefaultAsync<RssChannel>(sql, new { Id = id });
+        return await connection.QueryFirstOrDefaultAsync<RssChannel>(
+            new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
     }
 
-    public async Task AddAsync(RssChannel channel)
+    public async Task AddAsync(RssChannel channel, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
 
         const string sql = """
-            INSERT INTO RssChannels (Name, Url, Description, CreatedAt, UpdatedAt)
-            VALUES (@Name, @Url, @Description, @CreatedAt, @UpdatedAt);
+                               INSERT INTO RssChannels (Name, Url, Description, CreatedAt, UpdatedAt)
+                               VALUES (@Name, @Url, @Description, @CreatedAt, @UpdatedAt);
 
-            SELECT CAST(SCOPE_IDENTITY() as int);
-        """;
+                               SELECT CAST(SCOPE_IDENTITY() as int);
+                           """;
 
-        var id = await connection.QuerySingleAsync<int>(sql, channel);
+        var id = await connection.QuerySingleAsync<int>(
+            new CommandDefinition(sql, channel, cancellationToken: cancellationToken));
 
-        channel.Id = id; // ważne: ustawiamy Id w encji
+        channel.Id = id;
     }
 
-    public async Task UpdateAsync(RssChannel channel)
+    public async Task UpdateAsync(RssChannel channel, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
 
         const string sql = """
-            UPDATE RssChannels
-            SET Name = @Name,
-                Url = @Url,
-                Description = @Description,
-                UpdatedAt = @UpdatedAt
-            WHERE Id = @Id
-        """;
+                               UPDATE RssChannels
+                               SET Name = @Name,
+                                   Url = @Url,
+                                   Description = @Description,
+                                   UpdatedAt = @UpdatedAt
+                               WHERE Id = @Id
+                           """;
 
-        var affected = await connection.ExecuteAsync(sql, channel);
+        var affected = await connection.ExecuteAsync(
+            new CommandDefinition(sql, channel, cancellationToken: cancellationToken));
 
         if (affected == 0)
             throw new InvalidOperationException($"Channel with Id {channel.Id} not found.");
     }
 
-    public async Task DeleteAsync(RssChannel channel)
+    public async Task DeleteAsync(RssChannel channel, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
 
         const string sql = """
-            DELETE FROM RssChannels
-            WHERE Id = @Id
-        """;
+                               DELETE FROM RssChannels
+                               WHERE Id = @Id
+                           """;
 
-        var affected = await connection.ExecuteAsync(sql, new { channel.Id });
+        var affected = await connection.ExecuteAsync(
+            new CommandDefinition(sql, new { channel.Id }, cancellationToken: cancellationToken));
 
         if (affected == 0)
             throw new InvalidOperationException($"Channel with Id {channel.Id} not found.");

@@ -12,125 +12,148 @@ public class NewsItemRepository : INewsItemRepository
 
     public NewsItemRepository(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection") 
+        _connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     }
 
-    public async Task<List<NewsItem>> GetAllAsync()
+    public async Task<IReadOnlyList<NewsItem>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
+
         const string sql = @"
             SELECT Id, RssChannelId, Title, Description, Link, PublishedAt, CreatedAt 
             FROM NewsItems 
             ORDER BY PublishedAt DESC";
-        
-        var items = await connection.QueryAsync<NewsItem>(sql);
-        return items.ToList();
+
+        var result = await connection.QueryAsync<NewsItem>(
+            new CommandDefinition(sql, cancellationToken: cancellationToken));
+
+        return result.AsList();
     }
 
-    public async Task<List<NewsItem>> GetByChannelIdAsync(int channelId)
+    public async Task<IReadOnlyList<NewsItem>> GetByChannelIdAsync(int channelId, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
+
         const string sql = @"
             SELECT Id, RssChannelId, Title, Description, Link, PublishedAt, CreatedAt 
             FROM NewsItems 
             WHERE RssChannelId = @ChannelId 
             ORDER BY PublishedAt DESC";
-        
-        var items = await connection.QueryAsync<NewsItem>(sql, new { ChannelId = channelId });
-        return items.ToList();
+
+        var result = await connection.QueryAsync<NewsItem>(
+            new CommandDefinition(sql, new { ChannelId = channelId }, cancellationToken: cancellationToken));
+
+        return result.AsList();
     }
 
-    public async Task<NewsItem?> GetByIdAsync(int id)
+    public async Task<NewsItem?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
+
         const string sql = @"
             SELECT Id, RssChannelId, Title, Description, Link, PublishedAt, CreatedAt 
             FROM NewsItems 
             WHERE Id = @Id";
-        
-        return await connection.QueryFirstOrDefaultAsync<NewsItem>(sql, new { Id = id });
+
+        return await connection.QueryFirstOrDefaultAsync<NewsItem>(
+            new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
     }
 
-    public async Task<int> AddAsync(NewsItem newsItem)
+    public async Task<int> AddAsync(NewsItem entity, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
+
         const string sql = @"
             INSERT INTO NewsItems (RssChannelId, Title, Description, Link, PublishedAt, CreatedAt) 
             VALUES (@RssChannelId, @Title, @Description, @Link, @PublishedAt, @CreatedAt);
             SELECT CAST(SCOPE_IDENTITY() as int)";
-        
-        return await connection.QuerySingleAsync<int>(sql, new
-        {
-            newsItem.RssChannelId,
-            newsItem.Title,
-            newsItem.Description,
-            newsItem.Link,
-            newsItem.PublishedAt,
-            newsItem.CreatedAt
-        });
+
+        return await connection.QuerySingleAsync<int>(
+            new CommandDefinition(sql, new
+            {
+                entity.RssChannelId,
+                entity.Title,
+                entity.Description,
+                entity.Link,
+                entity.PublishedAt,
+                entity.CreatedAt
+            }, cancellationToken: cancellationToken));
     }
 
-    public async Task<bool> UpdateAsync(NewsItem newsItem)
+    public async Task<bool> UpdateAsync(NewsItem entity, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
+
         const string sql = @"
             UPDATE NewsItems 
-            SET RssChannelId = @RssChannelId, Title = @Title, Description = @Description, 
-                Link = @Link, PublishedAt = @PublishedAt 
+            SET RssChannelId = @RssChannelId,
+                Title = @Title,
+                Description = @Description,
+                Link = @Link,
+                PublishedAt = @PublishedAt 
             WHERE Id = @Id";
-        
-        var result = await connection.ExecuteAsync(sql, new
-        {
-            newsItem.Id,
-            newsItem.RssChannelId,
-            newsItem.Title,
-            newsItem.Description,
-            newsItem.Link,
-            newsItem.PublishedAt
-        });
-        
-        return result > 0;
+
+        var affected = await connection.ExecuteAsync(
+            new CommandDefinition(sql, new
+            {
+                entity.Id,
+                entity.RssChannelId,
+                entity.Title,
+                entity.Description,
+                entity.Link,
+                entity.PublishedAt
+            }, cancellationToken: cancellationToken));
+
+        return affected > 0;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
+
         const string sql = "DELETE FROM NewsItems WHERE Id = @Id";
-        var result = await connection.ExecuteAsync(sql, new { Id = id });
-        return result > 0;
+
+        var affected = await connection.ExecuteAsync(
+            new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
+
+        return affected > 0;
     }
 
-    public async Task<bool> DeleteByChannelIdAsync(int channelId)
+    public async Task<bool> DeleteByChannelIdAsync(int channelId, CancellationToken cancellationToken = default)
     {
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
+
         const string sql = "DELETE FROM NewsItems WHERE RssChannelId = @ChannelId";
-        var result = await connection.ExecuteAsync(sql, new { ChannelId = channelId });
-        return result > 0;
-    }
-    
-    public async Task BulkInsertIgnoreDuplicatesAsync(IEnumerable<NewsItem> items)
-    {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
 
-        using var transaction = connection.BeginTransaction();
+        var affected = await connection.ExecuteAsync(
+            new CommandDefinition(sql, new { ChannelId = channelId }, cancellationToken: cancellationToken));
+
+        return affected > 0;
+    }
+
+    public async Task BulkInsertIgnoreDuplicatesAsync(
+        IEnumerable<NewsItem> entities,
+        CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
         const string sql = @"
-        INSERT INTO NewsItems
-        (RssChannelId, Title, Description, Link, PublishedAt, CreatedAt)
-        SELECT @RssChannelId, @Title, @Description, @Link, @PublishedAt, @CreatedAt
-        WHERE NOT EXISTS (
-            SELECT 1 FROM NewsItems
-            WHERE RssChannelId = @RssChannelId
-              AND Link = @Link
-        );";
+            INSERT INTO NewsItems
+            (RssChannelId, Title, Description, Link, PublishedAt, CreatedAt)
+            SELECT @RssChannelId, @Title, @Description, @Link, @PublishedAt, @CreatedAt
+            WHERE NOT EXISTS (
+                SELECT 1 FROM NewsItems
+                WHERE RssChannelId = @RssChannelId
+                  AND Link = @Link
+            );";
 
-        await connection.ExecuteAsync(sql, items, transaction);
+        await connection.ExecuteAsync(
+            new CommandDefinition(sql, entities, transaction, cancellationToken: cancellationToken));
 
-        await transaction.CommitAsync();
+        await transaction.CommitAsync(cancellationToken);
     }
 }
-
-
-
