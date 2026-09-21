@@ -9,7 +9,7 @@ public class IndexModel : PageModel
 {
     private readonly INewsItemService _newsItemService;
     private readonly IChannelService _channelService;
-    private readonly Logger<IndexModel> _logger;
+    private readonly ILogger<IndexModel> _logger;
 
     public List<NewsItemDto> NewsItems { get; private set; } = new();
     public Dictionary<int, string> ChannelNames { get; private set; } = new();
@@ -17,7 +17,7 @@ public class IndexModel : PageModel
     public IndexModel(
         INewsItemService newsItemService,
         IChannelService channelService,
-        Logger<IndexModel> logger)
+        ILogger<IndexModel> logger)
     {
         _newsItemService = newsItemService;
         _channelService = channelService;
