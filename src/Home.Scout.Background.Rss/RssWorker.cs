@@ -1,8 +1,4 @@
-using System.Collections.Concurrent;
-using Home.Scout.Application.News;
-using Home.Scout.Application.RssChannels;
-using Home.Scout.Application.News.Dto;
-using Home.Scout.Background.Rss.Services;
+using Home.Scout.Application.Rss;
 
 namespace Home.Scout.Background.Rss;
 
@@ -42,40 +38,8 @@ public sealed class RssWorker : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
 
-        var rssService = scope.ServiceProvider.GetRequiredService<IRssFeedService>();
-        var newsItemService = scope.ServiceProvider.GetRequiredService<INewsItemService>();
-        var rssChannelService = scope.ServiceProvider.GetRequiredService<IChannelService>();
-        var channels = await rssChannelService.GetAllAsync();
+        var rssSyncService = scope.ServiceProvider.GetRequiredService<IRssSyncService>();
 
-        var allItems = new ConcurrentBag<CreateNewsItemDto>();
-
-        await Parallel.ForEachAsync(
-            channels,
-            new ParallelOptions
-            {
-                MaxDegreeOfParallelism = 6,
-                CancellationToken = token
-            },
-            async (channel, ct) =>
-            {
-                var items = await rssService.FetchNewsAsync(channel);
-
-                foreach (var item in items)
-                {
-                    allItems.Add(new CreateNewsItemDto
-                    {
-                        RssChannelId = item.RssChannelId,
-                        Title = item.Title,
-                        Description = item.Description,
-                        Link = item.Link,
-                        PublishedAt = item.PublishedAt,
-                    });
-                }
-            });
-
-        if (allItems.IsEmpty)
-            return;
-
-        await newsItemService.BulkInsertIgnoreDuplicatesAsync(allItems);
+        await rssSyncService.SyncAllAsync(token);
     }
 }

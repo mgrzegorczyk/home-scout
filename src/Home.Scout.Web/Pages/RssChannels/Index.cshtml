@@ -16,6 +16,14 @@
         </div>
     </div>
 
+    @if (!string.IsNullOrEmpty(Model?.StatusMessage))
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     @if (Model?.Channels?.Any() == true)
     {
         <div class="table-responsive">
@@ -42,6 +50,11 @@
                             <td class="text-muted">@(string.IsNullOrEmpty(channel.Description) ? "-" : channel.Description)</td>
                             <td>@channel.CreatedAt.ToString("g")</td>
                             <td>
+                                <form method="post" asp-page-handler="FetchNow" asp-route-id="@channel.Id" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-arrow-repeat"></i> Fetch now
+                                    </button>
+                                </form>
                                 <a href="/RssChannels/Edit/@channel.Id" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil"></i> Edit
                                 </a>

@@ -2,9 +2,9 @@
 using System.Xml;
 using Home.Scout.Application.Channels.Dto;
 using Home.Scout.Application.News.Dto;
-using Home.Scout.Domain.Models;
+using Microsoft.Extensions.Logging;
 
-namespace Home.Scout.Background.Rss.Services;
+namespace Home.Scout.Application.Rss;
 
 public interface IRssFeedService
 {
