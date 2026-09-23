@@ -1,8 +1,8 @@
 using Dapper;
 using Home.Scout.Application.RssChannels;
 using Home.Scout.Domain.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace Home.Scout.Infrastructure.RssChannels;
 
@@ -18,12 +18,12 @@ public class RssChannelRepository : IRssChannelRepository
 
     public async Task<List<RssChannel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = """
-                               SELECT Id, Name, Url, Description, CreatedAt, UpdatedAt
-                               FROM RssChannels
-                               ORDER BY Name
+                               SELECT "Id", "Name", "Url", "Description", "CreatedAt", "UpdatedAt"
+                               FROM "RssChannels"
+                               ORDER BY "Name"
                            """;
 
         var result = await connection.QueryAsync<RssChannel>(
@@ -34,12 +34,12 @@ public class RssChannelRepository : IRssChannelRepository
 
     public async Task<RssChannel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = """
-                               SELECT Id, Name, Url, Description, CreatedAt, UpdatedAt
-                               FROM RssChannels
-                               WHERE Id = @Id
+                               SELECT "Id", "Name", "Url", "Description", "CreatedAt", "UpdatedAt"
+                               FROM "RssChannels"
+                               WHERE "Id" = @Id
                            """;
 
         return await connection.QueryFirstOrDefaultAsync<RssChannel>(
@@ -48,13 +48,12 @@ public class RssChannelRepository : IRssChannelRepository
 
     public async Task AddAsync(RssChannel channel, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = """
-                               INSERT INTO RssChannels (Name, Url, Description, CreatedAt, UpdatedAt)
-                               VALUES (@Name, @Url, @Description, @CreatedAt, @UpdatedAt);
-
-                               SELECT CAST(SCOPE_IDENTITY() as int);
+                               INSERT INTO "RssChannels" ("Name", "Url", "Description", "CreatedAt", "UpdatedAt")
+                               VALUES (@Name, @Url, @Description, @CreatedAt, @UpdatedAt)
+                               RETURNING "Id";
                            """;
 
         var id = await connection.QuerySingleAsync<int>(
@@ -65,15 +64,15 @@ public class RssChannelRepository : IRssChannelRepository
 
     public async Task UpdateAsync(RssChannel channel, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = """
-                               UPDATE RssChannels
-                               SET Name = @Name,
-                                   Url = @Url,
-                                   Description = @Description,
-                                   UpdatedAt = @UpdatedAt
-                               WHERE Id = @Id
+                               UPDATE "RssChannels"
+                               SET "Name" = @Name,
+                                   "Url" = @Url,
+                                   "Description" = @Description,
+                                   "UpdatedAt" = @UpdatedAt
+                               WHERE "Id" = @Id
                            """;
 
         var affected = await connection.ExecuteAsync(
@@ -85,11 +84,11 @@ public class RssChannelRepository : IRssChannelRepository
 
     public async Task DeleteAsync(RssChannel channel, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = """
-                               DELETE FROM RssChannels
-                               WHERE Id = @Id
+                               DELETE FROM "RssChannels"
+                               WHERE "Id" = @Id
                            """;
 
         var affected = await connection.ExecuteAsync(

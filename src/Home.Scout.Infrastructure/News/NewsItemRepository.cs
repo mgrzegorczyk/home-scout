@@ -1,8 +1,8 @@
 using Dapper;
 using Home.Scout.Application.News;
 using Home.Scout.Domain.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace Home.Scout.Infrastructure.News;
 
@@ -18,12 +18,12 @@ public class NewsItemRepository : INewsItemRepository
 
     public async Task<IReadOnlyList<NewsItem>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = @"
-            SELECT Id, RssChannelId, Title, Description, Link, PublishedAt, CreatedAt 
-            FROM NewsItems 
-            ORDER BY PublishedAt DESC";
+            SELECT ""Id"", ""RssChannelId"", ""Title"", ""Description"", ""Link"", ""PublishedAt"", ""CreatedAt""
+            FROM ""NewsItems""
+            ORDER BY ""PublishedAt"" DESC";
 
         var result = await connection.QueryAsync<NewsItem>(
             new CommandDefinition(sql, cancellationToken: cancellationToken));
@@ -33,13 +33,13 @@ public class NewsItemRepository : INewsItemRepository
 
     public async Task<IReadOnlyList<NewsItem>> GetByChannelIdAsync(int channelId, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = @"
-            SELECT Id, RssChannelId, Title, Description, Link, PublishedAt, CreatedAt 
-            FROM NewsItems 
-            WHERE RssChannelId = @ChannelId 
-            ORDER BY PublishedAt DESC";
+            SELECT ""Id"", ""RssChannelId"", ""Title"", ""Description"", ""Link"", ""PublishedAt"", ""CreatedAt""
+            FROM ""NewsItems""
+            WHERE ""RssChannelId"" = @ChannelId
+            ORDER BY ""PublishedAt"" DESC";
 
         var result = await connection.QueryAsync<NewsItem>(
             new CommandDefinition(sql, new { ChannelId = channelId }, cancellationToken: cancellationToken));
@@ -49,12 +49,12 @@ public class NewsItemRepository : INewsItemRepository
 
     public async Task<NewsItem?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = @"
-            SELECT Id, RssChannelId, Title, Description, Link, PublishedAt, CreatedAt 
-            FROM NewsItems 
-            WHERE Id = @Id";
+            SELECT ""Id"", ""RssChannelId"", ""Title"", ""Description"", ""Link"", ""PublishedAt"", ""CreatedAt""
+            FROM ""NewsItems""
+            WHERE ""Id"" = @Id";
 
         return await connection.QueryFirstOrDefaultAsync<NewsItem>(
             new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
@@ -62,12 +62,12 @@ public class NewsItemRepository : INewsItemRepository
 
     public async Task<int> AddAsync(NewsItem entity, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = @"
-            INSERT INTO NewsItems (RssChannelId, Title, Description, Link, PublishedAt, CreatedAt) 
-            VALUES (@RssChannelId, @Title, @Description, @Link, @PublishedAt, @CreatedAt);
-            SELECT CAST(SCOPE_IDENTITY() as int)";
+            INSERT INTO ""NewsItems"" (""RssChannelId"", ""Title"", ""Description"", ""Link"", ""PublishedAt"", ""CreatedAt"")
+            VALUES (@RssChannelId, @Title, @Description, @Link, @PublishedAt, @CreatedAt)
+            RETURNING ""Id""";
 
         return await connection.QuerySingleAsync<int>(
             new CommandDefinition(sql, new
@@ -83,16 +83,16 @@ public class NewsItemRepository : INewsItemRepository
 
     public async Task<bool> UpdateAsync(NewsItem entity, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
         const string sql = @"
-            UPDATE NewsItems 
-            SET RssChannelId = @RssChannelId,
-                Title = @Title,
-                Description = @Description,
-                Link = @Link,
-                PublishedAt = @PublishedAt 
-            WHERE Id = @Id";
+            UPDATE ""NewsItems""
+            SET ""RssChannelId"" = @RssChannelId,
+                ""Title"" = @Title,
+                ""Description"" = @Description,
+                ""Link"" = @Link,
+                ""PublishedAt"" = @PublishedAt
+            WHERE ""Id"" = @Id";
 
         var affected = await connection.ExecuteAsync(
             new CommandDefinition(sql, new
@@ -110,9 +110,9 @@ public class NewsItemRepository : INewsItemRepository
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
-        const string sql = "DELETE FROM NewsItems WHERE Id = @Id";
+        const string sql = @"DELETE FROM ""NewsItems"" WHERE ""Id"" = @Id";
 
         var affected = await connection.ExecuteAsync(
             new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
@@ -122,9 +122,9 @@ public class NewsItemRepository : INewsItemRepository
 
     public async Task<bool> DeleteByChannelIdAsync(int channelId, CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
 
-        const string sql = "DELETE FROM NewsItems WHERE RssChannelId = @ChannelId";
+        const string sql = @"DELETE FROM ""NewsItems"" WHERE ""RssChannelId"" = @ChannelId";
 
         var affected = await connection.ExecuteAsync(
             new CommandDefinition(sql, new { ChannelId = channelId }, cancellationToken: cancellationToken));
@@ -136,19 +136,19 @@ public class NewsItemRepository : INewsItemRepository
         IEnumerable<NewsItem> entities,
         CancellationToken cancellationToken = default)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
         const string sql = @"
-            INSERT INTO NewsItems
-            (RssChannelId, Title, Description, Link, PublishedAt, CreatedAt)
+            INSERT INTO ""NewsItems""
+            (""RssChannelId"", ""Title"", ""Description"", ""Link"", ""PublishedAt"", ""CreatedAt"")
             SELECT @RssChannelId, @Title, @Description, @Link, @PublishedAt, @CreatedAt
             WHERE NOT EXISTS (
-                SELECT 1 FROM NewsItems
-                WHERE RssChannelId = @RssChannelId
-                  AND Link = @Link
+                SELECT 1 FROM ""NewsItems""
+                WHERE ""RssChannelId"" = @RssChannelId
+                  AND ""Link"" = @Link
             );";
 
         await connection.ExecuteAsync(
