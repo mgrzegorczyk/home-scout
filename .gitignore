@@ -5,3 +5,8 @@ riderModule.iml
 /_ReSharper.Caches/
 .idea/*
 .env
+
+# Agent pipeline QA state (generated per run)
+.ai/qa/artifacts_*/
+.ai/qa/test-env.json
+.ai/qa/test-env.env
