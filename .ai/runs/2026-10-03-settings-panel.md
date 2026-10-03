@@ -50,3 +50,4 @@ Replace the top-level `Channels` navbar link with a gear icon that opens a Setti
 
 - [x] 2.1 Add _SettingsLayout and move channel pages into it — 719f098
 - [x] 2.2 Replace Channels nav link with gear — 7c539f3
+- [x] Post-review fix: gear switches to bi-gear-fill on settings pages (text-dark hid .active) — ad7a8ba
