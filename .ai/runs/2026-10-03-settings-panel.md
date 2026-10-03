@@ -42,9 +42,9 @@ Replace the top-level `Channels` navbar link with a gear icon that opens a Setti
 
 ### Phase 1: Foundations
 
-- [ ] 1.1 Add web test project and fixture
-- [ ] 1.2 Add settings category registry
-- [ ] 1.3 Add /Settings entry page
+- [x] 1.1 Add web test project and fixture — af59e5c
+- [x] 1.2 Add settings category registry — 57bbe55
+- [x] 1.3 Add /Settings entry page — b582e4c
 
 ### Phase 2: Settings panel
 
