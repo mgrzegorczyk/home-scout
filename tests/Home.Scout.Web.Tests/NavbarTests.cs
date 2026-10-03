@@ -5,9 +5,9 @@ namespace Home.Scout.Web.Tests;
 
 public class NavbarTests : IClassFixture<ScoutWebApplicationFactory>
 {
-    // The navbar gear link, in any attribute order; captures the opening tag.
+    // The navbar gear link, in any attribute order; captures the opening tag and the icon class.
     private static readonly Regex GearLink = new(
-        @"<a(?=[^>]*href=""/Settings"")(?=[^>]*aria-label=""Settings"")(?=[^>]*title=""Settings"")[^>]*>\s*<i[^>]*class=""bi bi-gear""");
+        @"<a(?=[^>]*href=""/Settings"")(?=[^>]*aria-label=""Settings"")(?=[^>]*title=""Settings"")[^>]*>\s*<i[^>]*class=""bi (?<icon>bi-gear(-fill)?)""");
 
     private readonly ScoutWebApplicationFactory _factory;
 
@@ -24,6 +24,7 @@ public class NavbarTests : IClassFixture<ScoutWebApplicationFactory>
         var gear = GearLink.Match(html);
         Assert.True(gear.Success, "Gear link to /Settings not found.");
         Assert.DoesNotContain("aria-current", gear.Value);
+        Assert.Equal("bi-gear", gear.Groups["icon"].Value);
         Assert.DoesNotContain(">Channels</a>", html);
     }
 
@@ -39,6 +40,7 @@ public class NavbarTests : IClassFixture<ScoutWebApplicationFactory>
         Assert.True(gear.Success, "Gear link to /Settings not found.");
         Assert.Contains("aria-current=\"page\"", gear.Value);
         Assert.Contains("active", gear.Value);
+        Assert.Equal("bi-gear-fill", gear.Groups["icon"].Value);
     }
 
     private async Task<string> GetOkHtmlAsync(string url)
