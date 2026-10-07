@@ -48,12 +48,12 @@ Follows the spec's Implementation Plan verbatim.
 
 ### Phase 1: Settings panel and `/settings` URLs
 
-- [ ] 1.1 Add web test project and fixture
-- [ ] 1.2 Add settings category registry
-- [ ] 1.3 Add /settings entry page
-- [ ] 1.4 Move channel pages into the settings panel
-- [ ] 1.5 Replace Channels nav link with gear
-- [ ] 1.6 Amend BACKWARD_COMPATIBILITY.md section 3
+- [x] 1.1 Add web test project and fixture — b04a825
+- [x] 1.2 Add settings category registry — 6476c70
+- [x] 1.3 Add /settings entry page — 3bfbb88 (landed after 1.4: the redirect target page must exist first)
+- [x] 1.4 Move channel pages into the settings panel — 9a3e28a
+- [x] 1.5 Replace Channels nav link with gear — 5ade416
+- [x] 1.6 Amend BACKWARD_COMPATIBILITY.md section 3 — 7526fb9
 
 ### Phase 2: Phone-friendly channel table
 
