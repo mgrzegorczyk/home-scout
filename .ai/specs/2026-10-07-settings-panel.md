@@ -1,6 +1,6 @@
-# Settings panel (v2)
+# Settings panel
 
-Brief: [.ai/specs/briefs/2026-10-07-settings-panel.md](briefs/2026-10-07-settings-panel.md). Supersedes the abandoned `2026-10-03-settings-panel.md` (PR #4/#5, closed unmerged).
+Brief: [.ai/specs/briefs/2026-10-07-settings-panel.md](briefs/2026-10-07-settings-panel.md).
 
 ## 📝 TLDR
 Today channel management is a `Channels` link in the navbar at `/RssChannels`, and its table spills off the screen on phones. After this change, a gear icon opens a **Settings** area at `/settings` with a category menu. **Channels** is its first category, at `/settings/channels`. The old `/RssChannels/*` URLs are removed. On screens narrower than 768px the channel table drops two columns and folds its three action buttons into one "⋯" menu, so it fits a 360px phone without sideways scrolling.
@@ -18,7 +18,8 @@ The owner settled every product decision in the brief (its *Resolved unknowns* t
 
 ## 📝 Problem Statement
 - Channels is configuration, not content, yet it sits in the primary navbar next to `News`. Every future configuration screen would add another top-level link.
-- The first attempt (PR #5) was rejected by the owner for two reasons. It kept the channel pages at `/RssChannels/*`, while the owner wants every settings page under `/settings/`. And on a 390px phone, the channel table's Description, Added at and Actions columns overflowed, so Fetch now, Edit and Delete could only be reached by scrolling sideways. Its forms also sat offset to the right inside the panel (`col-md-8 offset-md-2`).
+- The owner wants every settings page under a `/settings/` URL prefix, so the channel pages leave `/RssChannels/*`.
+- The channel table doesn't work on phones. On a 390px phone, the Description, Added at and Actions columns overflow, so Fetch now, Edit and Delete can only be reached by scrolling sideways.
 
 ## 📝 Proposed Solution
 **Phase 1: the Settings panel and its URLs**
@@ -94,7 +95,7 @@ Desktop ≥ md                                         Phone < md (360px)
 ## 📝 Risks & Impact Review
 - **Contract break, by owner decision.** Removing `/RssChannels`, `/RssChannels/Create`, `/RssChannels/Edit/{id:int}`, `/RssChannels/Delete/{id:int}` and the `FetchNow` handler on `/RssChannels` breaks `BACKWARD_COMPATIBILITY.md` §3, whose required path is a redirect. The owner explicitly rejected redirects. To keep the contract document truthful, the same PR amends §3:
   - it replaces the listed channel routes with `/settings`, `/settings/channels`, `/settings/channels/create`, `/settings/channels/edit/{id:int}`, `/settings/channels/delete/{id:int}` and the `FetchNow` handler on `/settings/channels`,
-  - it adds a dated note: "`/RssChannels/*` removed without redirects (owner decision, settings panel v2; single-user self-hosted install, no external links)".
+  - it adds a dated note: "`/RssChannels/*` removed without redirects (owner decision, settings panel; single-user self-hosted install, no external links)".
 
   Code review should treat the break as approved only when this amendment is in the diff.
 - **Shared layout.** `_Layout` renders on every page, so a regression shows up everywhere. Integration tests cover `/News` and every settings page.

@@ -10,11 +10,9 @@
 
 Channel management is configuration, but it sits in the primary navbar as a `Channels` link next to `News`. Every future configuration screen would add another top-level link. The owner wants one entry point, a gear icon, that opens a Settings area with categories, starting with Channels.
 
-A first attempt (spec PR #4, implementation PR #5, both closed unmerged on 2026-10-07) was rejected by the owner for two reasons:
-1. It kept the channel pages at `/RssChannels/*`. The owner wants every settings page under a `/settings/` prefix.
-2. The channel table was not responsive. On a 390px phone, the Description, Added at and Actions columns overflowed off-screen, and Fetch now, Edit and Delete were reachable only by horizontal scrolling. This is pre-existing behaviour that the first attempt did not fix.
-
-A third issue was noted in review: inside the panel, the Create, Edit and Delete forms kept `col-md-8 offset-md-2` and sat offset to the right.
+Two more requirements shape the design:
+1. Every settings page lives under a `/settings/` URL prefix, so the channel pages leave `/RssChannels/*`.
+2. The channel table must work on phones. Today, on a 390px phone, the Description, Added at and Actions columns overflow off-screen, and Fetch now, Edit and Delete can only be reached by horizontal scrolling.
 
 ## Agreed direction
 
@@ -42,7 +40,6 @@ Rejected options:
 | Table acceptance criteria | At a 360px viewport the channels page has no horizontal scroll. The "⋯" dropdown opens fully and isn't clipped (the table currently sits in `.table-responsive`, an `overflow-x` container that clips dropdowns). Long channel names and URLs are truncated with an ellipsis. |
 | Channel forms in the panel | Create, Edit and Delete take the full width of the panel's content column. Drop `col-md-8 offset-md-2`. |
 | Phasing | Phase 1: the panel, the gear, `/settings` URLs and §3. Phase 2: the responsive table, with its own acceptance criteria, so it can be split into a separate PR if it fails QA. |
-| Previous spec | This brief supersedes `.ai/specs/2026-10-03-settings-panel.md` (from the abandoned `spec/settings-panel` branch). Don't reuse its decision Q2 (keep `/RssChannels`). |
 
 ## Non-goals
 
