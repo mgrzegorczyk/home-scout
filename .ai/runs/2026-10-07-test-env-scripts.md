@@ -35,5 +35,5 @@ Commit the verified `om-prepare-test-env` entrypoint scripts so every checkout a
 
 ### Phase 1: Test environment tooling
 
-- [ ] 1.1 Add the entrypoint scripts with LF line-ending rules
-- [ ] 1.2 Ignore runtime state and add repo-local skill notes
+- [x] 1.1 Add the entrypoint scripts with LF line-ending rules — 5b9591a
+- [x] 1.2 Ignore runtime state and add repo-local skill notes — 15e3ed0
