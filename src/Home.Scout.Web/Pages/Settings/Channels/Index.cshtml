@@ -25,15 +25,15 @@
 
 @if (Model?.Channels?.Any() == true)
 {
-    <div class="table-responsive">
+    <div class="channels-table">
         <table class="table table-striped table-hover">
             <thead class="table-dark">
                 <tr>
-                    <th>Name</th>
+                    <th class="channels-col-name">Name</th>
                     <th>URL</th>
                     <th class="d-none d-md-table-cell">Description</th>
                     <th class="d-none d-md-table-cell">Added at</th>
-                    <th>
+                    <th class="channels-col-actions">
                         <span class="d-none d-md-inline">Actions</span>
                         <span class="visually-hidden d-md-none">Actions</span>
                     </th>
@@ -43,9 +43,9 @@
                 @foreach (var channel in Model.Channels)
                 {
                     <tr>
-                        <td><strong>@channel.Name</strong></td>
+                        <td class="text-truncate" title="@channel.Name"><strong>@channel.Name</strong></td>
                         <td>
-                            <a href="@channel.Url" target="_blank" class="text-truncate d-inline-block" style="max-width: 250px;">
+                            <a href="@channel.Url" target="_blank" class="channel-url d-block text-truncate" title="@channel.Url">
                                 @channel.Url
                             </a>
                         </td>

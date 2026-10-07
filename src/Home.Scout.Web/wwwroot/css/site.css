@@ -20,3 +20,39 @@ html {
 body {
   margin-bottom: 60px;
 }
+/* Channel list (settings panel). Below md the table must fit the screen: no
+   horizontal-scroll container (it would clip the actions dropdown), fixed
+   layout and ellipsis truncation. From md up it keeps the scroll fallback and
+   today's look. */
+.channels-table {
+  overflow-x: visible;
+}
+
+@media (max-width: 767.98px) {
+  .channels-table table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .channels-table .channels-col-name {
+    width: 40%;
+  }
+
+  .channels-table .channels-col-actions {
+    width: 3rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .channels-table {
+    overflow-x: auto;
+  }
+
+  .channels-table td.text-truncate {
+    white-space: normal;
+  }
+
+  .channels-table .channel-url {
+    max-width: 250px;
+  }
+}

@@ -54,6 +54,28 @@ public class ChannelTableTests : IClassFixture<ScoutWebApplicationFactory>
         Assert.Contains("href=\"/settings/channels/delete/1\"", buttons);
     }
 
+    [Fact]
+    public async Task Table_HasNoScrollContainer_ThatWouldClipTheDropdown()
+    {
+        var html = await _factory.GetHtmlAsync("/settings/channels");
+
+        Assert.DoesNotContain("table-responsive", html);
+        Assert.Contains("<div class=\"channels-table\">", html);
+    }
+
+    [Fact]
+    public async Task NameAndUrl_TruncateWithFullValueInTitle()
+    {
+        var html = await _factory.GetHtmlAsync("/settings/channels");
+
+        Assert.Contains("<td class=\"text-truncate\" title=\"Test Channel\">", html);
+        var urlAnchor = Regex.Match(html, @"<a href=""https://example\.com/feed\.xml""[^>]*>");
+        Assert.True(urlAnchor.Success, "URL anchor not found.");
+        Assert.Contains("class=\"channel-url d-block text-truncate\"", urlAnchor.Value);
+        Assert.Contains("title=\"https://example.com/feed.xml\"", urlAnchor.Value);
+        Assert.DoesNotContain("max-width", urlAnchor.Value);
+    }
+
     private static string Section(string html, string start, string end)
     {
         var from = html.IndexOf(start, StringComparison.Ordinal);
