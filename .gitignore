@@ -10,3 +10,8 @@ riderModule.iml
 .ai/qa/artifacts_*/
 .ai/qa/test-env.json
 .ai/qa/test-env.env
+.ai/qa/test-env-build-cache.json
+.ai/qa/test-env-*.log
+.ai/qa/test-env-docker.err
+.ai/qa/test-env.started
+.ai/qa/test-env.lock/
