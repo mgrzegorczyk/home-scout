@@ -44,6 +44,22 @@ public class ChannelTableTests : IClassFixture<ScoutWebApplicationFactory>
     }
 
     [Fact]
+    public async Task FetchNow_FromDropdown_PostsWithAntiforgery_AndRedirectsBackToList()
+    {
+        var client = _factory.CreateNonRedirectingClient();   // keeps the antiforgery cookie
+        var html = await (await client.GetAsync("/settings/channels")).Content.ReadAsStringAsync();
+        var dropdown = Section(html, "<div class=\"dropdown d-md-none\">", "</ul>");
+        var action = Regex.Match(dropdown, @"<form method=""post"" action=""([^""]+)""").Groups[1].Value.Replace("&amp;", "&");
+        var token = Regex.Match(dropdown, @"name=""__RequestVerificationToken"" type=""hidden"" value=""([^""]+)""").Groups[1].Value;
+
+        var response = await client.PostAsync(action, new FormUrlEncodedContent(
+            new Dictionary<string, string> { ["__RequestVerificationToken"] = token }));
+
+        Assert.Equal(System.Net.HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/settings/channels", response.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
     public async Task Row_KeepsButtonGroup_FromMd()
     {
         var html = await _factory.GetHtmlAsync("/settings/channels");
