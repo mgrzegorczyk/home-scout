@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Home.Scout.Application.Channels.Dto;
 using Home.Scout.Application.RssChannels;
 
-namespace Home.Scout.Web.Pages.RssChannels;
+namespace Home.Scout.Web.Pages.Settings.Channels;
 
 public class EditModel : PageModel
 {

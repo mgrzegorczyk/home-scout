@@ -1,0 +1,36 @@
+@page "/settings/channels/delete/{id:int}"
+@model Home.Scout.Web.Pages.Settings.Channels.DeleteModel
+@{
+    ViewData["Title"] = "Delete RSS Channel";
+}
+
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">Are you sure?</h4>
+    <p>Would you like to delete channel?</p>
+    <hr>
+    <p class="mb-0">All articles will be lost</p>
+</div>
+
+@if (Model?.Channel != null)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@Model.Channel.Name</h5>
+            <p class="card-text">@Model.Channel.Description</p>
+            <a href="@Model.Channel.Url" target="_blank" class="btn btn-sm btn-link">Refresh channel</a>
+        </div>
+    </div>
+
+    <form method="post" style="display: inline;">
+        <button type="submit" class="btn btn-danger">Delete channel and news also</button>
+    </form>
+    <a href="/settings/channels" class="btn btn-secondary">Cancel</a>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        Channel not found
+    </div>
+    <a href="/settings/channels" class="btn btn-secondary">Return to channels</a>
+}
+
