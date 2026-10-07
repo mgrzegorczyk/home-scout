@@ -31,9 +31,12 @@
                 <tr>
                     <th>Name</th>
                     <th>URL</th>
-                    <th>Description</th>
-                    <th>Added at</th>
-                    <th>Actions</th>
+                    <th class="d-none d-md-table-cell">Description</th>
+                    <th class="d-none d-md-table-cell">Added at</th>
+                    <th>
+                        <span class="d-none d-md-inline">Actions</span>
+                        <span class="visually-hidden d-md-none">Actions</span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -46,20 +49,47 @@
                                 @channel.Url
                             </a>
                         </td>
-                        <td class="text-muted">@(string.IsNullOrEmpty(channel.Description) ? "-" : channel.Description)</td>
-                        <td>@channel.CreatedAt.ToString("g")</td>
+                        <td class="text-muted d-none d-md-table-cell">@(string.IsNullOrEmpty(channel.Description) ? "-" : channel.Description)</td>
+                        <td class="d-none d-md-table-cell">@channel.CreatedAt.ToString("g")</td>
                         <td>
-                            <form method="post" asp-page-handler="FetchNow" asp-route-id="@channel.Id" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-success">
-                                    <i class="bi bi-arrow-repeat"></i> Fetch now
+                            <div class="d-none d-md-inline-flex flex-wrap gap-1">
+                                <form method="post" asp-page-handler="FetchNow" asp-route-id="@channel.Id" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-arrow-repeat"></i> Fetch now
+                                    </button>
+                                </form>
+                                <a href="/settings/channels/edit/@channel.Id" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a href="/settings/channels/delete/@channel.Id" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </div>
+                            <div class="dropdown d-md-none">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown"
+                                        aria-expanded="false" aria-label="Actions for @channel.Name">
+                                    <i class="bi bi-three-dots" aria-hidden="true"></i>
                                 </button>
-                            </form>
-                            <a href="/settings/channels/edit/@channel.Id" class="btn btn-sm btn-warning">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <a href="/settings/channels/delete/@channel.Id" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i> Delete
-                            </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <form method="post" asp-page-handler="FetchNow" asp-route-id="@channel.Id">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-arrow-repeat" aria-hidden="true"></i> Fetch now
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/settings/channels/edit/@channel.Id">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i> Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="/settings/channels/delete/@channel.Id">
+                                            <i class="bi bi-trash" aria-hidden="true"></i> Delete
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                 }
