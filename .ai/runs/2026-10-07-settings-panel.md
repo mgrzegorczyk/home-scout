@@ -57,5 +57,5 @@ Follows the spec's Implementation Plan verbatim.
 
 ### Phase 2: Phone-friendly channel table
 
-- [ ] 2.1 Slim the channel table below md
-- [ ] 2.2 Remove sideways scroll and clipping below md
+- [x] 2.1 Slim the channel table below md — fe576f4
+- [x] 2.2 Remove sideways scroll and clipping below md — daa6113
