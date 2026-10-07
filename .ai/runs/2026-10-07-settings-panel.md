@@ -59,3 +59,4 @@ Follows the spec's Implementation Plan verbatim.
 
 - [x] 2.1 Slim the channel table below md — fe576f4
 - [x] 2.2 Remove sideways scroll and clipping below md — daa6113
+- [x] Post-review fix: integration test for the Fetch now POST (antiforgery + redirect) at /settings/channels — 0e53819
