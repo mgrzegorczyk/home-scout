@@ -1,0 +1,1 @@
+QA screenshot evidence referenced from pull request comments, one folder per PR (pr-<number>/). This branch holds no code and is never merged.
