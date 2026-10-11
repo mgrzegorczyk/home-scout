@@ -3,7 +3,7 @@
 Brief: [.ai/specs/briefs/2026-10-07-settings-panel.md](briefs/2026-10-07-settings-panel.md).
 
 ## 📝 TLDR
-Today channel management is a `Channels` link in the navbar at `/RssChannels`, and its table spills off the screen on phones. After this change, a gear icon opens a **Settings** area at `/settings` with a category menu. **Channels** is its first category, at `/settings/channels`. The old `/RssChannels/*` URLs are removed. On screens narrower than 768px the channel table drops two columns and folds its three action buttons into one "⋯" menu, so it fits a 360px phone without sideways scrolling.
+Today channel management is a `Channels` link in the navbar at `/RssChannels`, and its table spills off the screen on phones. After this change, a gear icon opens a **Settings** area at `/settings` with a category menu. **Channels** is its first category, at `/settings/channels`. The old `/RssChannels/*` URLs are removed. On screens narrower than 992px the channel table drops two columns and folds its three action buttons into one "⋯" menu, so it fits a 360px phone without sideways scrolling.
 
 ## 📝 Resolved assumptions (autonomous defaults)
 
@@ -13,7 +13,7 @@ The owner settled every product decision in the brief (its *Resolved unknowns* t
 |---|----------|-----------------|-----|----------|
 | Q1 | How are lowercase `/settings/...` URLs enforced (the brief asks for an explicit mechanism)? | **Explicit absolute `@page` route templates** on each moved page (e.g. `@page "/settings/channels/edit/{id:int}"`), not the global `LowercaseUrls` option. | It's contained to the moved pages. `LowercaseUrls` would also rewrite every other generated link (`/News` → `/news`), which nobody asked for. `asp-page` links are generated from the template, so they come out lowercase too. | reversible |
 | Q2 | What does an old `/RssChannels/*` URL show? | The framework's default **404**, with no custom error page. | The brief removes the routes. A friendly 404 page is a separate, app-wide concern. | reversible |
-| Q3 | How should the table behave between 768px and 991px (tablet), where all five columns are shown in the narrower panel column? | **Unchanged:** the full table keeps today's horizontal-scroll container from 768px up. The no-scroll guarantee applies below 768px. | The brief's acceptance criteria target phones (360px). Hiding more columns on tablets would be new scope. | reversible |
+| Q3 | How should the table behave between 768px and 991px (tablet), where all five columns are shown in the narrower panel column? | **Amended on PR #9 (owner review, 2026-10-11):** the compact table (hidden Description/Added at, "⋯" actions) applies below `lg` (992px), so 768–991px has no horizontal scroll either. The full table and its scroll fallback start at 992px. (Originally: unchanged from 768px up.) | The brief's acceptance criteria target phones (360px). Hiding more columns on tablets would be new scope. | reversible |
 | Q4 | Which test framework does the repository's first test project use? `AGENTS.md` (Tests row) says it "should be agreed first", and the brief doesn't decide it, so the owner confirmed it. | **xUnit + `Microsoft.AspNetCore.Mvc.Testing`** (`WebApplicationFactory` with faked Application services, no Postgres). | It's the ASP.NET Core default for in-memory integration tests and is needed to verify routes, links and markup. | confirmed by owner |
 
 ## 📝 Problem Statement
@@ -23,7 +23,7 @@ The owner settled every product decision in the brief (its *Resolved unknowns* t
 
 ## 📝 Proposed Solution
 **Phase 1: the Settings panel and its URLs**
-- **Gear in the navbar.** The `Channels` nav item becomes a right-aligned gear (`bi-gear`, filled `bi-gear-fill` when active) linking to `/settings`. It has `aria-label="Settings"`, a `title`, and a visible label `<span class="d-sm-none ms-1">Settings</span>` below the `sm` breakpoint, where the collapsed menu lists it vertically. Bootstrap 5.1 has no responsive `visually-hidden`, so the `aria-label` names the link at every width. It is active (with `aria-current="page"`) on every page that belongs to a settings category.
+- **Gear in the navbar.** The `Channels` nav item becomes a right-aligned gear (`bi-gear`, the same outline icon in every state; the owner asked on PR #9 that it not turn dark when active) linking to `/settings`. It has `aria-label="Settings"`, a `title`, and a visible label `<span class="d-sm-none ms-1">Settings</span>` below the `sm` breakpoint, where the collapsed menu lists it vertically. Bootstrap 5.1 has no responsive `visually-hidden`, so the `aria-label` names the link at every width. It is active (with `aria-current="page"`) on every page that belongs to a settings category. `html` reserves the scrollbar gutter (`scrollbar-gutter: stable`) so the centered navbar does not shift sideways between long pages (News) and short ones (Settings).
 - **`/settings` entry page.** It redirects (302) to the first registered category, or returns 404 if the registry is empty.
 - **Category registry.** `Home.Scout.Web/Settings/SettingsCategories.cs` holds an ordered list of `SettingsCategory(Key, Title, Icon, EntryPage, PagePrefix)`, where `PagePrefix` is a Razor **page path** (`/Settings/Channels`), not a URL. `FindForPage(pagePath)` matches the prefix exactly or with `prefix + "/"`. Both the layout menu and the gear's active state read from it, taking the current page path from `ViewContext.RouteData.Values["page"] as string` (e.g. `/Settings/Channels/Edit`).
 - **Settings layout.** `Pages/Shared/_SettingsLayout.cshtml` nests in `_Layout`. It contains a "Settings" heading, a `<nav aria-label="Settings categories">` pill menu (vertical from `md` up, a horizontal row above the content below `md`), and the page body. It **must** re-render `@section Scripts`, because Create and Edit define it for client-side validation, and Razor throws "section defined but not rendered" otherwise.
@@ -34,9 +34,9 @@ The owner settled every product decision in the brief (its *Resolved unknowns* t
 - **Contract record.** `BACKWARD_COMPATIBILITY.md` §3 is amended in the same PR (see Risks).
 
 **Phase 2: the phone-friendly channel table**
-- Below `md` (<768px): the Description and Added at columns are hidden (`d-none d-md-table-cell` on `th` and `td`), and the Actions cell shows one "⋯" dropdown toggle (`d-md-none`) instead of the three buttons (`d-none d-md-inline-flex`). The dropdown holds **Fetch now** (a `<button type="submit">` inside its own `FetchNow` POST form, built with the same form tag helper as the md-up button so antiforgery is kept; each row therefore renders two forms, one per breakpoint), **Edit** and **Delete** (danger-styled), aligned `dropdown-menu-end`. The toggle's accessible name is `Actions for {channel name}`.
-- **No clipping, no sideways scroll.** Below `md` the table is **not** inside an overflow container: the wrapper becomes `.channels-table`, and a `site.css` rule gives it `overflow-x: auto` only `@media (min-width: 768px)`. With no clipping ancestor, the dropdown renders in full. Below `md` the table uses `table-layout: fixed; width: 100%`, and the action column is `3rem` wide. The Name column is `40%` wide and URL takes the remaining width. The Name cell gets `text-truncate` with the full value in `title`. The URL anchor (today `text-truncate d-inline-block` with an inline `max-width: 250px`, `Index.cshtml:46`) loses the inline `max-width` and becomes `d-block text-truncate` with `title`, so the ellipsis appears at the cell edge instead of the cell silently clipping a 250px anchor. Long names and URLs end in an ellipsis instead of widening the table.
-- From `md` up the table looks and behaves as it does today (Q3).
+- Below `lg` (<992px; from `md` up the table shares the row with the settings menu): the Description and Added at columns are hidden (`d-none d-lg-table-cell` on `th` and `td`), and the Actions cell shows one "⋯" dropdown toggle (`d-lg-none`) instead of the three buttons (`d-none d-lg-inline-flex`). The dropdown holds **Fetch now** (a `<button type="submit">` inside its own `FetchNow` POST form, built with the same form tag helper as the lg-up button so antiforgery is kept; each row therefore renders two forms, one per breakpoint), **Edit** and **Delete** (danger-styled), aligned `dropdown-menu-end`. The toggle's accessible name is `Actions for {channel name}`.
+- **No clipping, no sideways scroll.** Below `lg` the table is **not** inside an overflow container: the wrapper becomes `.channels-table`, and a `site.css` rule gives it `overflow-x: auto` only `@media (min-width: 992px)`. With no clipping ancestor, the dropdown renders in full. Below `lg` the table uses `table-layout: fixed; width: 100%`, and the action column is `3rem` wide. The Name column is `40%` wide and URL takes the remaining width. The Name cell gets `text-truncate` with the full value in `title`. The URL anchor (today `text-truncate d-inline-block` with an inline `max-width: 250px`, `Index.cshtml:46`) loses the inline `max-width` and becomes `d-block text-truncate` with `title`, so the ellipsis appears at the cell edge instead of the cell silently clipping a 250px anchor. Long names and URLs end in an ellipsis instead of widening the table.
+- From `lg` up the table looks and behaves as it does today (Q3).
 
 **Alternatives considered** (decided in the brief):
 - An offcanvas drawer or modal. Rejected because the CRUD forms are server-validated full pages.
@@ -68,7 +68,7 @@ The registry is the single source of truth for which pages are "settings". Addin
 ## 📝 UI/UX
 
 ```
-Desktop ≥ md                                         Phone < md (360px)
+Desktop ≥ lg                                         Phone < lg (360px)
 ┌ Scout  News                          ⚙ ┐            ┌ Scout                ☰ ┐
 │ Settings                               │            │ Settings                │
 │ ┌────────────┐ RSS Channels  [+ Add]   │            │ [▌Channels]             │
@@ -88,7 +88,7 @@ Desktop ≥ md                                         Phone < md (360px)
 - **An old bookmark** to `/RssChannels/...` gets a 404. This is accepted by the owner (single-user, self-hosted). The PR and §3 record it.
 - **Empty registry** (a future misconfiguration): `/settings` returns 404. A unit test pins that the registry is non-empty.
 - **Fetch now from the "⋯" menu** posts to `/settings/channels?handler=FetchNow&id={id}` (`asp-route-id` is not in the route template, so it travels as a query value), then redirects back to `/settings/channels` with the status alert. Antiforgery is preserved because the button sits inside the form tag helper.
-- **A very long channel name or URL** is truncated with an ellipsis below `md`, with the full value in `title`. From `md` up, today's horizontal-scroll fallback still applies.
+- **A very long channel name or URL** is truncated with an ellipsis below `lg`, with the full value in `title`. From `lg` up, today's horizontal-scroll fallback still applies.
 - **Bootstrap Icons CDN unavailable:** the gear and "⋯" icons disappear, but the gear's `aria-label` and `title`, its visible label below `sm`, and the toggle's accessible name keep them usable. This is the same dependency the app already has on every page.
 - **Errors on channel pages** (e.g. the database is down): behaviour is unchanged and renders inside the settings layout.
 
@@ -119,11 +119,11 @@ Desktop ≥ md                                         Phone < md (360px)
    - `/RssChannels`, `/RssChannels/Create` and `/RssChannels/Edit/1` return 404;
    - the `/News` empty state links to `/settings/channels`;
    - no rendered page contains `href="/RssChannels`.
-5. **Replace the Channels link with the gear.** Change `_Layout` as described above. Integration tests: `/News` has the gear (`href="/settings"`, `aria-label="Settings"`, outline icon, no `aria-current`) and no `Channels` nav link; the settings pages mark the gear active with `aria-current="page"` and the filled icon.
+5. **Replace the Channels link with the gear.** Change `_Layout` as described above. Integration tests: `/News` has the gear (`href="/settings"`, `aria-label="Settings"`, outline icon, no `aria-current`) and no `Channels` nav link; the settings pages mark the gear active with `aria-current="page"` and keep the outline icon.
 6. **Amend `BACKWARD_COMPATIBILITY.md` §3.** Make the route list and removal note described under Risks. This is docs-only; the review checks it against the routes asserted in step 4.
 
 ### Phase 2: Phone-friendly channel table
-1. **Slim the table below `md`.** Add the responsive column classes, the "⋯" dropdown (with Fetch now inside the POST form, plus Edit and Delete) and the md-up button group. Integration tests on `/settings/channels`:
-   - the Description and Added at `th`/`td` carry `d-none d-md-table-cell`;
-   - each row has a `d-md-none` dropdown toggle named `Actions for {name}`, whose menu contains a POST form to `?handler=FetchNow&id={id}` with an antiforgery token, and links to `/settings/channels/edit/1` and `/settings/channels/delete/1`.
-2. **Remove sideways scroll and clipping below `md`.** Replace `.table-responsive` with `.channels-table` and add the `site.css` rules (overflow only at ≥768px; fixed layout, truncation and a narrow action column below). Integration test: the list page has no `table-responsive` wrapper, the Name cell and the URL anchor carry `text-truncate` with a `title`, and the URL anchor has no inline `max-width` style. Browser QA (`om-auto-qa-pr`) at 360px verifies the acceptance criteria: no horizontal scroll, the dropdown opens fully, long values are truncated.
+1. **Slim the table below `lg`.** Add the responsive column classes, the "⋯" dropdown (with Fetch now inside the POST form, plus Edit and Delete) and the lg-up button group. Integration tests on `/settings/channels`:
+   - the Description and Added at `th`/`td` carry `d-none d-lg-table-cell`;
+   - each row has a `d-lg-none` dropdown toggle named `Actions for {name}`, whose menu contains a POST form to `?handler=FetchNow&id={id}` with an antiforgery token, and links to `/settings/channels/edit/1` and `/settings/channels/delete/1`.
+2. **Remove sideways scroll and clipping below `lg`.** Replace `.table-responsive` with `.channels-table` and add the `site.css` rules (overflow only at ≥992px; fixed layout, truncation and a narrow action column below). Integration test: the list page has no `table-responsive` wrapper, the Name cell and the URL anchor carry `text-truncate` with a `title`, and the URL anchor has no inline `max-width` style. Browser QA (`om-auto-qa-pr`) at 360px verifies the acceptance criteria: no horizontal scroll, the dropdown opens fully, long values are truncated.

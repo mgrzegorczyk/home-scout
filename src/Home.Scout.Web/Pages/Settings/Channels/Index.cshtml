@@ -31,11 +31,11 @@
                 <tr>
                     <th class="channels-col-name">Name</th>
                     <th>URL</th>
-                    <th class="d-none d-md-table-cell">Description</th>
-                    <th class="d-none d-md-table-cell">Added at</th>
+                    <th class="d-none d-lg-table-cell">Description</th>
+                    <th class="d-none d-lg-table-cell">Added at</th>
                     <th class="channels-col-actions">
-                        <span class="d-none d-md-inline">Actions</span>
-                        <span class="visually-hidden d-md-none">Actions</span>
+                        <span class="d-none d-lg-inline">Actions</span>
+                        <span class="visually-hidden d-lg-none">Actions</span>
                     </th>
                 </tr>
             </thead>
@@ -49,10 +49,10 @@
                                 @channel.Url
                             </a>
                         </td>
-                        <td class="text-muted d-none d-md-table-cell">@(string.IsNullOrEmpty(channel.Description) ? "-" : channel.Description)</td>
-                        <td class="d-none d-md-table-cell">@channel.CreatedAt.ToString("g")</td>
+                        <td class="text-muted d-none d-lg-table-cell">@(string.IsNullOrEmpty(channel.Description) ? "-" : channel.Description)</td>
+                        <td class="d-none d-lg-table-cell">@channel.CreatedAt.ToString("g")</td>
                         <td>
-                            <div class="d-none d-md-inline-flex flex-wrap gap-1">
+                            <div class="d-none d-lg-inline-flex flex-wrap gap-1">
                                 <form method="post" asp-page-handler="FetchNow" asp-route-id="@channel.Id" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-success">
                                         <i class="bi bi-arrow-repeat"></i> Fetch now
@@ -65,7 +65,7 @@
                                     <i class="bi bi-trash"></i> Delete
                                 </a>
                             </div>
-                            <div class="dropdown d-md-none">
+                            <div class="dropdown d-lg-none">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown"
                                         aria-expanded="false" aria-label="Actions for @channel.Name">
                                     <i class="bi bi-three-dots" aria-hidden="true"></i>

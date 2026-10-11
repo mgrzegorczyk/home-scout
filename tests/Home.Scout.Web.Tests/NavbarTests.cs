@@ -40,7 +40,15 @@ public class NavbarTests : IClassFixture<ScoutWebApplicationFactory>
         Assert.True(gear.Success, "Gear link to /settings not found.");
         Assert.Contains("aria-current=\"page\"", gear.Value);
         Assert.Contains("active", gear.Value);
-        Assert.Equal("bi-gear-fill", gear.Groups["icon"].Value);
+        Assert.Equal("bi-gear", gear.Groups["icon"].Value);
+    }
+
+    [Fact]
+    public async Task SiteCss_ReservesScrollbarGutter_SoTheNavbarDoesNotShift()
+    {
+        var css = await _factory.GetHtmlAsync("/css/site.css");
+
+        Assert.Matches(new Regex(@"html\s*\{[^}]*scrollbar-gutter:\s*stable;"), css);
     }
 
     [Fact]

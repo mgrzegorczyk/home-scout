@@ -14,27 +14,27 @@ public class ChannelTableTests : IClassFixture<ScoutWebApplicationFactory>
     [Theory]
     [InlineData("Description")]
     [InlineData("Added at")]
-    public async Task SecondaryColumnHeaders_AreHiddenBelowMd(string header)
+    public async Task SecondaryColumnHeaders_AreHiddenBelowLg(string header)
     {
         var html = await _factory.GetHtmlAsync("/settings/channels");
 
-        Assert.Contains($"<th class=\"d-none d-md-table-cell\">{header}</th>", html);
+        Assert.Contains($"<th class=\"d-none d-lg-table-cell\">{header}</th>", html);
     }
 
     [Fact]
-    public async Task SecondaryColumnCells_AreHiddenBelowMd()
+    public async Task SecondaryColumnCells_AreHiddenBelowLg()
     {
         var html = await _factory.GetHtmlAsync("/settings/channels");
 
         // One faked channel: its Description and Added at cells are both responsive.
-        Assert.Equal(2, Regex.Matches(html, @"<td class=""[^""]*\bd-none d-md-table-cell""").Count);
+        Assert.Equal(2, Regex.Matches(html, @"<td class=""[^""]*\bd-none d-lg-table-cell""").Count);
     }
 
     [Fact]
-    public async Task Row_HasActionsDropdown_BelowMd()
+    public async Task Row_HasActionsDropdown_BelowLg()
     {
         var html = await _factory.GetHtmlAsync("/settings/channels");
-        var dropdown = Section(html, "<div class=\"dropdown d-md-none\">", "</ul>");
+        var dropdown = Section(html, "<div class=\"dropdown d-lg-none\">", "</ul>");
 
         Assert.Matches(new Regex(@"<button(?=[^>]*data-bs-toggle=""dropdown"")(?=[^>]*aria-label=""Actions for Test Channel"")"), dropdown);
         Assert.Matches(new Regex(@"<form method=""post"" action=""/settings/channels\?(?=[^""]*handler=FetchNow)(?=[^""]*\bid=1)"), dropdown);
@@ -48,7 +48,7 @@ public class ChannelTableTests : IClassFixture<ScoutWebApplicationFactory>
     {
         var client = _factory.CreateNonRedirectingClient();   // keeps the antiforgery cookie
         var html = await (await client.GetAsync("/settings/channels")).Content.ReadAsStringAsync();
-        var dropdown = Section(html, "<div class=\"dropdown d-md-none\">", "</ul>");
+        var dropdown = Section(html, "<div class=\"dropdown d-lg-none\">", "</ul>");
         var action = Regex.Match(dropdown, @"<form method=""post"" action=""([^""]+)""").Groups[1].Value.Replace("&amp;", "&");
         var token = Regex.Match(dropdown, @"name=""__RequestVerificationToken"" type=""hidden"" value=""([^""]+)""").Groups[1].Value;
 
@@ -60,10 +60,10 @@ public class ChannelTableTests : IClassFixture<ScoutWebApplicationFactory>
     }
 
     [Fact]
-    public async Task Row_KeepsButtonGroup_FromMd()
+    public async Task Row_KeepsButtonGroup_FromLg()
     {
         var html = await _factory.GetHtmlAsync("/settings/channels");
-        var buttons = Section(html, "<div class=\"d-none d-md-inline-flex flex-wrap gap-1\">", "</div>");
+        var buttons = Section(html, "<div class=\"d-none d-lg-inline-flex flex-wrap gap-1\">", "</div>");
 
         Assert.Contains("Fetch now", buttons);
         Assert.Contains("href=\"/settings/channels/edit/1\"", buttons);
