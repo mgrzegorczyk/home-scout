@@ -4,7 +4,7 @@ using Home.Scout.Application.Rss;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Home.Scout.Web.Pages.RssChannels;
+namespace Home.Scout.Web.Pages.Settings.Channels;
 
 public class IndexModel : PageModel
 {

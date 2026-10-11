@@ -1,0 +1,48 @@
+@page "/settings/channels/edit/{id:int}"
+@model Home.Scout.Web.Pages.Settings.Channels.EditModel
+@{
+    ViewData["Title"] = "Edit RSS Channel";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (Model?.Channel == null)
+{
+    <div class="alert alert-danger" role="alert">
+        Channel not found
+    </div>
+}
+else
+{
+    <form method="post" class="needs-validation mt-4">
+        <input type="hidden" asp-for="Channel.Id" />
+
+        <div class="mb-3">
+            <label asp-for="Input.Name" class="form-label">Channel name*</label>
+            <input asp-for="Input.Name" class="form-control" required />
+            <span asp-validation-for="Input.Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Url" class="form-label">URL</label>
+            <input asp-for="Input.Url" type="url" class="form-control" required />
+            <span asp-validation-for="Input.Url" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Description" class="form-label">Description (optional)</label>
+            <textarea asp-for="Input.Description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+            <a href="/settings/channels" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update channel</button>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

@@ -23,8 +23,19 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/News/Index">News</a>
                         </li>
+                    </ul>
+                    @{
+                        var inSettings = SettingsCategories.FindForPage(ViewContext.RouteData.Values["page"] as string) is not null;
+                    }
+                    <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/RssChannels/Index">Channels</a>
+                            <a class="nav-link text-dark @(inSettings ? "active" : null)"
+                               aria-current="@(inSettings ? "page" : null)"
+                               aria-label="Settings" title="Settings"
+                               asp-area="" asp-page="/Settings/Index">
+                                <i class="bi bi-gear" aria-hidden="true"></i>
+                                <span class="d-sm-none ms-1">Settings</span>
+                            </a>
                         </li>
                     </ul>
                 </div>

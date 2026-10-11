@@ -28,11 +28,14 @@ Home.Scout is a single deployable app (web, worker, and database shipped togethe
 
 ## 3. Web routes
 
-**Surface:** the user-visible URLs `/` (redirects to `/News`), `/News`, `/RssChannels`, `/RssChannels/Create`, `/RssChannels/Edit/{id:int}`, `/RssChannels/Delete/{id:int}`, and the `FetchNow` handler on `/RssChannels`. Users bookmark these.
+**Surface:** the user-visible URLs `/` (redirects to `/News`), `/News`, `/settings` (redirects to the first settings category), `/settings/channels`, `/settings/channels/create`, `/settings/channels/edit/{id:int}`, `/settings/channels/delete/{id:int}`, and the `FetchNow` handler on `/settings/channels`. Users bookmark these.
 
 **Breaking:** removing or renaming a route, or changing its parameter shape.
 
 **Required path:** keep the old URL working with a redirect to the new one, and mention the change in the PR. Internal page model and handler refactors that keep the URLs are not breaking.
+
+**Recorded exceptions:**
+- 2026-10-07, settings panel: `/RssChannels`, `/RssChannels/Create`, `/RssChannels/Edit/{id:int}`, `/RssChannels/Delete/{id:int}` and the `FetchNow` handler on `/RssChannels` were removed without redirects and now return 404. This was an owner decision: Home.Scout is a single-user, self-hosted install with no external links to these pages. Spec: `.ai/specs/2026-10-07-settings-panel.md`.
 
 ## 4. Background sync behaviour
 

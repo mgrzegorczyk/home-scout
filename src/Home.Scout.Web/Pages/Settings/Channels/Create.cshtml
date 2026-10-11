@@ -1,0 +1,37 @@
+@page "/settings/channels/create"
+@model Home.Scout.Web.Pages.Settings.Channels.CreateModel
+@{
+    ViewData["Title"] = "Add RSS Channel";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post" class="needs-validation mt-4">
+    <div class="mb-3">
+        <label asp-for="Input.Name" class="form-label">Channel name *</label>
+        <input asp-for="Input.Name" class="form-control" placeholder="eg. BBC News" required />
+        <span asp-validation-for="Input.Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Input.Url" class="form-label">URL *</label>
+        <input asp-for="Input.Url" type="url" class="form-control" placeholder="https://example.com/feed.xml" required />
+        <span asp-validation-for="Input.Url" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Input.Description" class="form-label">Description (optional)</label>
+        <textarea asp-for="Input.Description" class="form-control" rows="3" placeholder="Short description..."></textarea>
+    </div>
+
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+        <a href="/settings/channels" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Add channel</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
