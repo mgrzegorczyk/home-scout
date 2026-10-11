@@ -258,17 +258,20 @@ gh pr comment {prNumber} --body-file <path-or-process-substitution>
 #### attach-image-evidence
 `{prNumber}`, a markdown comment body (without the images), a `{slug}` (e.g. `pr-{prNumber}`), and a list of local PNG paths → post one comment with the images embedded **inline**, and return the comment URL.
 
-GitHub does not accept image bytes through the comment API, so make the images referenceable first. For a **public** repo, upload them to a dedicated **slash-free** evidence branch (never the change's own branch) via the Contents API and reference `raw.githubusercontent.com` URLs — those render inline in comments:
+GitHub does not accept image bytes through the comment API, so make the images referenceable first. For a **public** repo, upload them to the shared **slash-free** evidence branch `qa-evidence` (never the change's own branch), one `{slug}/` folder per PR, via the Contents API and reference `raw.githubusercontent.com` URLs — those render inline in comments. One shared branch keeps the branch list clean: there is no per-PR branch to delete after a merge, and deleting one would break the images in that PR's comments.
 
 ```bash
 OWNER_REPO=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
-EVIDENCE_BRANCH="qa-evidence-{slug}"                 # slash-free: some raw URLs 404 on slashed refs
-DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
+EVIDENCE_BRANCH="qa-evidence"                        # shared by all PRs; slash-free: some raw URLs 404 on slashed refs
 
-# create the evidence branch if missing (branched from the default branch head)
-gh api "repos/${OWNER_REPO}/git/refs/heads/${EVIDENCE_BRANCH}" >/dev/null 2>&1 || {
-  SHA=$(gh api "repos/${OWNER_REPO}/git/refs/heads/${DEFAULT_BRANCH}" --jq .object.sha)
-  gh api -X POST "repos/${OWNER_REPO}/git/refs" -f ref="refs/heads/${EVIDENCE_BRANCH}" -f sha="$SHA" >/dev/null
+# create the evidence branch if missing, as an orphan holding only a README, so it
+# carries no copy of the code. `git/ref/` (singular) matches the name exactly;
+# `git/refs/` would also match a prefix such as `qa-evidence-old` and skip the creation.
+gh api "repos/${OWNER_REPO}/git/ref/heads/${EVIDENCE_BRANCH}" >/dev/null 2>&1 || {
+  TREE=$(gh api -X POST "repos/${OWNER_REPO}/git/trees" -f 'tree[][path]=README.md' -f 'tree[][mode]=100644' -f 'tree[][type]=blob' \
+    -f 'tree[][content]=QA screenshot evidence referenced from pull request comments, one folder per PR (pr-<number>/). This branch holds no code and is never merged.' --jq .sha)
+  COMMIT=$(gh api -X POST "repos/${OWNER_REPO}/git/commits" -f message="chore(qa): start the shared QA evidence branch" -f tree="$TREE" --jq .sha)
+  gh api -X POST "repos/${OWNER_REPO}/git/refs" -f ref="refs/heads/${EVIDENCE_BRANCH}" -f sha="$COMMIT" >/dev/null
 }
 
 # upload each image. An image-sized base64 string blows the shell arg limit, so it
