@@ -62,3 +62,4 @@ PR: #9
 - [x] 2.1 Slim the channel table below md — fe576f4
 - [x] 2.2 Remove sideways scroll and clipping below md — daa6113
 - [x] Post-review fix: integration test for the Fetch now POST (antiforgery + redirect) at /settings/channels — 0e53819
+- [x] Post-review fix (owner feedback): outline gear in every state, stable scrollbar gutter, compact channel table below lg (no sideways scroll at 768–991px) — aa4dfd6
