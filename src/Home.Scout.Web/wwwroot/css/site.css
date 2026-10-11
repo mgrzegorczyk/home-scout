@@ -59,3 +59,12 @@ body {
     max-width: 250px;
   }
 }
+
+/* Icon + label buttons: the icon and the label are separate flex items, so a
+   wrapped label starts under its own first word, not under the icon. */
+.btn-icon-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  text-align: start;
+}

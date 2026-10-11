@@ -66,6 +66,9 @@ public class ChannelTableTests : IClassFixture<ScoutWebApplicationFactory>
         var buttons = Section(html, "<div class=\"d-none d-lg-inline-flex flex-wrap gap-1\">", "</div>");
 
         Assert.Contains("Fetch now", buttons);
+        // Icon and label are separate flex items, so a wrapped label aligns with its first word.
+        Assert.Equal(3, Regex.Matches(buttons, @"class=""btn btn-sm btn-\w+ btn-icon-label""").Count);
+        Assert.Contains("</i><span>Fetch now</span>", buttons);
         Assert.Contains("href=\"/settings/channels/edit/1\"", buttons);
         Assert.Contains("href=\"/settings/channels/delete/1\"", buttons);
     }
